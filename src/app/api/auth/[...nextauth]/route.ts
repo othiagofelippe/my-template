@@ -1,3 +1,4 @@
+import api from "@/utils/axios-config";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -9,25 +10,28 @@ const nextAuthOptions: NextAuthOptions = {
         email: { label: "E-mail", type: "text" },
         password: { label: "Senha", type: "password" },
       },
-      async authorize(credentials, req) {
-        const response = await fetch("http://localhost:5000/users", {
-          method: "POST",
-          headers: {
-            "Content-type": "application/json",
-          },
-          body: JSON.stringify({
-            email: credentials?.email,
-            password: credentials?.password,
-          }),
-        });
-
-        const user = await response.json();
-
-        if (user && response.ok) {
-          return user;
+      authorize: async (credentials) => {
+        if (!credentials) {
+          return null;
         }
 
-        return null;
+        try {
+          const { data: users } = await api.get(
+            `/users?email=${credentials.email}`,
+          );
+
+          const user = users[0];
+
+          if (user && user.password === credentials.password) {
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+          }
+
+          return null;
+        } catch (error) {
+          console.error("Erro na busca do usuário:", error);
+          return null;
+        }
       },
     }),
   ],
