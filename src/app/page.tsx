@@ -6,6 +6,8 @@ import { loginSchema } from "@/schema/loginSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Image from "next/image";
 import { Controller, useForm } from "react-hook-form";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const {
@@ -16,12 +18,29 @@ export default function Home() {
     resolver: yupResolver(loginSchema),
   });
 
+  const router = useRouter();
+
   const onSubmit = async (data: LoginFormData) => {
-    console.log(data);
+    const result = await signIn("credentials", {
+      email: data.email,
+      password: data.password,
+      redirect: false,
+    });
+
+    if (result?.error) {
+      console.log(result.error);
+      return;
+    }
+
+    console.log(result);
+
+    if (result?.ok) {
+      router.replace("/admin");
+    }
   };
 
   return (
-    <div className="bg-white h-screen flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
+    <div className="flex h-screen min-h-full flex-1 flex-col justify-center bg-white px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
         <Image
           height={40}
