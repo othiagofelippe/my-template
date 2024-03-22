@@ -1,21 +1,21 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+"use client";
+
 import "./globals.css";
+import NextAuthSessionProvider from "@/providers/sessionProvider";
+import QueryProvider from "@/utils/react-query-config";
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Login",
-};
-
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
     <html lang="pt-BR">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <QueryProvider>
+          <NextAuthSessionProvider>{children}</NextAuthSessionProvider>
+        </QueryProvider>
+      </body>
     </html>
   );
 }
